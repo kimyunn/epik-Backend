@@ -1,5 +1,18 @@
 spring:
   jackson:
     serialization:
-      write-dates-as-timestamps: false  # LocalDateTime ? ???
-    time-zone: "Asia/Seoul"              # ??? ??
+      write-dates-as-timestamps: false
+    time-zone: "Asia/Seoul"
+  datasource:
+    url: jdbc:mysql://localhost:3306/epik
+    username: root
+    password: ekdrms@89
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
