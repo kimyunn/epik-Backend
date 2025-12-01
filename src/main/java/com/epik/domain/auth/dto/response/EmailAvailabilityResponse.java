@@ -1,5 +1,5 @@
 package com.epik.domain.auth.dto.response;
 
-public record AvailabilityCheckResponse(
+public record EmailAvailabilityResponse(
         boolean available
 ) {}
