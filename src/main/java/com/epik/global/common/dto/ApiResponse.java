@@ -27,8 +27,8 @@ public class ApiResponse<T> {
     /**
      * 성공 응답 생성 (데이터 없음)
      */
-    public static <T> ApiResponse<T> success() {
-        return ApiResponse.<T>builder()
+    public static ApiResponse<Void> success() {
+        return ApiResponse.<Void>builder()
                 .success(true)
                 .build();
     }

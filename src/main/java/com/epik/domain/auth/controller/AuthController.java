@@ -7,6 +7,7 @@ import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
 import com.epik.domain.auth.service.AuthService;
 import com.epik.global.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +31,17 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success());
     }
 
     @GetMapping("/check-join")
-    public ResponseEntity<JoinMethodResponse> checkJoinMethod(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<JoinMethodResponse>> checkJoinMethod(@RequestParam
+            String email) {
         JoinMethodResponse response = authService.checkJoinMethod(email);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
