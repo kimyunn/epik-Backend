@@ -1,11 +1,18 @@
 package com.epik.domain.auth.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_consents")
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // (접근제한자 protected로 된) 기본 생성자를 자동으로 생성
+@AllArgsConstructor(access = AccessLevel.PRIVATE)   // Builder 전용
+@Builder
 public class UserConsent {
 
     @Id
@@ -33,4 +40,13 @@ public class UserConsent {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consent_item_id", nullable = false)
     private ConsentItem consentItem;
+
+    public static UserConsent create(User user, ConsentItem consentItem, Boolean isAgreed) {
+        return UserConsent.builder()
+                .user(user)
+                .consentItem(consentItem)
+                .isAgreed(isAgreed)
+                .changedAt(LocalDateTime.now())
+                .build();
+    }
 }

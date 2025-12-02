@@ -22,11 +22,11 @@ public class ConsentItem extends BaseTimeEntity {
     private String description;
 
     @Column(nullable = false)
-    private Boolean required;
+    private Boolean isRequired;
 
     @Column(length = 20, nullable = false)
     private String version;
 
     @Column(nullable = false)
-    private Boolean active = true;
+    private Boolean isActive;
 }
