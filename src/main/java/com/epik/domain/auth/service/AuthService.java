@@ -2,6 +2,7 @@ package com.epik.domain.auth.service;
 
 import com.epik.domain.auth.dto.request.SignupRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
+import com.epik.domain.auth.dto.response.JoinMethodResponse;
 import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
 import com.epik.domain.auth.entity.ConsentItem;
 import com.epik.domain.auth.entity.User;
@@ -180,5 +181,14 @@ public class AuthService {
         userConsentRepository.save(userConsent);
     }
 
-
+    /**
+     * 가입 방식 조회
+     * @param email
+     */
+    public JoinMethodResponse checkJoinMethod(String email) {
+        return userRepository.findByEmail(email)
+                .filter(user -> user.getDeletedAt() == null)  // null이면 활성 회원
+                .map(user -> JoinMethodResponse.registered(user.getEmail(), user.getJoinType()))
+                .orElse(JoinMethodResponse.notRegistered(email));
+    }
 }

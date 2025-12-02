@@ -2,6 +2,7 @@ package com.epik.domain.auth.controller;
 
 import com.epik.domain.auth.dto.request.SignupRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
+import com.epik.domain.auth.dto.response.JoinMethodResponse;
 import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
 import com.epik.domain.auth.service.AuthService;
 import com.epik.global.common.dto.ApiResponse;
@@ -18,15 +19,14 @@ public class AuthController {
 
     @GetMapping("/email/available")
     public ResponseEntity<ApiResponse<EmailAvailabilityResponse>> checkEmailAvailability(@RequestParam String email) {
-        EmailAvailabilityResponse available = authService.isEmailAvailable(email);
-
-        return ResponseEntity.ok(ApiResponse.success(available));
+        EmailAvailabilityResponse response = authService.isEmailAvailable(email);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/nickname/available")
     public ResponseEntity<ApiResponse<NicknameAvailabilityResponse>> checkNicknameAvailability(@RequestParam String nickname) {
-        NicknameAvailabilityResponse available = authService.isNicknameAvailable(nickname);
-        return ResponseEntity.ok(ApiResponse.success(available));
+        NicknameAvailabilityResponse response = authService.isNicknameAvailable(nickname);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/signup")
@@ -35,4 +35,9 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/check-join")
+    public ResponseEntity<JoinMethodResponse> checkJoinMethod(@RequestParam String email) {
+        JoinMethodResponse response = authService.checkJoinMethod(email);
+        return ResponseEntity.ok(response);
+    }
 }

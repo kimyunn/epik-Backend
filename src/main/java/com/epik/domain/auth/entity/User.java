@@ -5,14 +5,11 @@ import com.epik.domain.auth.entity.enums.UserRole;
 import com.epik.domain.auth.entity.enums.UserStatus;
 import com.epik.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-//@Getter
+@Getter
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // (접근제한자 protected로 된) 기본 생성자를 자동으로 생성
