@@ -70,4 +70,8 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
 }

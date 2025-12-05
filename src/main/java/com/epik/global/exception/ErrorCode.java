@@ -1,7 +1,6 @@
 package com.epik.global.exception;
 
 import lombok.Getter;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -23,16 +22,16 @@ public enum ErrorCode {
 
     // OIDC - ID Token (O-XXX)
     MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "O-001", "ID 토큰 형식이 올바르지 않습니다."),
-    EXPIRED_ID_TOKEN(HttpStatus.UNAUTHORIZED, "O-002", "ID 토큰이 만료되었습니다."),
-    INVALID_ID_TOKEN(HttpStatus.UNAUTHORIZED, "O-003", "ID 토큰이 유효하지 않습니다."),
+    INVALID_OR_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "O-002", "유효하지 않거나 만료된 토큰입니다"),
     OIDC_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "O-500", "ID 토큰 처리 중 오류가 발생했습니다."),
 
     // Token - Access/Refresh (T-XXX)
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "T-001", "유효하지 않은 인증 정보입니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "T-001", "유효하지 않은 토큰입니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "T-002", "인증이 만료되었습니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "T-003", "인증 정보를 찾을 수 없습니다. 다시 로그인해 주세요."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "T-004", "인증이 만료되었습니다. 다시 로그인해 주세요."),
     INVALID_REGISTER_TOKEN(HttpStatus.UNAUTHORIZED, "T-005", "회원가입 정보가 유효하지 않습니다. 처음부터 다시 진행해 주세요."),
+    TOKEN_ALREADY_USED(HttpStatus.BAD_REQUEST, "T-006", "이미 사용된 토큰입니다."),
 
     // Password (P-XXX)
     PASSWORD_RESET_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "P-001", "비밀번호 재설정 링크가 만료되었습니다."),
