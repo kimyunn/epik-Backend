@@ -1,8 +1,10 @@
 package com.epik.domain.auth.controller;
 
 import com.epik.domain.auth.dto.request.PasswordResetEmailRequest;
+import com.epik.domain.auth.dto.request.PasswordResetRequest;
 import com.epik.domain.auth.service.PasswordService;
 import com.epik.global.common.dto.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +27,20 @@ public class PasswordController {
      * 비밀번호 재설정 이메일 발송
      */
     @PostMapping("/reset/email")
-    public ResponseEntity<ApiResponse<Void>> sendPasswordResetEmail(@RequestBody PasswordResetEmailRequest request) {
+    public ResponseEntity<ApiResponse<Void>> sendPasswordResetEmail(@RequestBody @Valid PasswordResetEmailRequest request) {
         passwordService.sendPasswordResetEmail(request.getEmail());
         return ResponseEntity.ok(ApiResponse.success());
     }
 
+    /**
+     * 비밀번호 재설정 (로그인 전)
+     * /password/reset
+     * resetPassword
+     */
+    @PostMapping("/reset")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid PasswordResetRequest request) {
+        passwordService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 
 }

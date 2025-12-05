@@ -1,5 +1,7 @@
 package com.epik.domain.auth.entity;
 
+import com.epik.global.exception.BusinessException;
+import com.epik.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -58,11 +60,30 @@ public class PasswordResetToken {
     }
 
     /**
+     * 토큰 유효성 검증 (사용 여부, 만료 여부) 및 사용 처리
+     */
+    public void validate() {
+        validateNotUsed();
+        validateNotExpired();
+    }
+
+    private void validateNotUsed() {
+        if (this.used) {
+            throw new BusinessException(ErrorCode.TOKEN_ALREADY_USED);
+        }
+    }
+
+    private void validateNotExpired() {
+        if (this.expiresAt.isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.TOKEN_EXPIRED);
+        }
+    }
+
+    /**
      * 토큰 사용 처리
      */
-    public void use() {
+    public void markAsUsed() {
         this.used = true;
         this.usedAt = LocalDateTime.now();
     }
-
 }
