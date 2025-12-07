@@ -1,9 +1,11 @@
 package com.epik.domain.auth.controller;
 
+import com.epik.domain.auth.dto.request.LoginRequest;
 import com.epik.domain.auth.dto.request.SignupRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
 import com.epik.domain.auth.dto.response.JoinMethodResponse;
 import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
+import com.epik.domain.auth.dto.response.TokenResponse;
 import com.epik.domain.auth.service.AuthService;
 import com.epik.global.common.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -57,6 +59,12 @@ public class AuthController {
             @Email(message = "이메일을 @까지 정확하게 입력해 주세요")
             String email) {
         JoinMethodResponse response = authService.checkJoinMethod(email);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody @Valid LoginRequest request) {
+        TokenResponse response = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

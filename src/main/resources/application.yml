@@ -27,3 +27,10 @@ spring:
           auth: true
           starttls:
             enable: true
+
+jwt:
+  secret: ${SECRET_KEY}
+  access-token:
+    expiration: 1800000  # 30분 (밀리초)
+  refresh-token:
+    expiration: 1209600000  # 14일 (밀리초)
