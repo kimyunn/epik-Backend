@@ -1,7 +1,10 @@
 package com.epik.domain.auth.jwt;
 
 import com.epik.domain.auth.entity.enums.UserRole;
+import com.epik.global.exception.BusinessException;
+import com.epik.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -32,25 +35,13 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Access Token 생성
-     * @param id   사용자 식별자
+     * Access Token을 생성한다.
+     *
+     * @param id 사용자 식별자
      * @param role 사용자 권한
-     * @return 생성된 Access Token(JWT 문자열)
+     * @return JWT 형식의 Access Token
      */
     public String createAccessToken(Long id, UserRole role) {
-        /**
-         * 사용자의 식별자(userId)와 권한(role)을 기반으로 Access Token을 생성한다.
-         * Access Token은 짧은 만료 시간을 가지며 클라이언트의 인증 요청 시 사용된다.
-         *
-         * 포함되는 정보:
-         * - subject: userId
-         * - role: 사용자 권한
-         * - iat: 발급 시간(issuedAt)
-         * - exp: 만료 시간(expiration)
-         *
-         * JWT는 서버의 SecretKey로 서명되어 위변조 여부를 검증할 수 있다.
-         */
-
         Date now = new Date();
         Date expiration = new Date(now.getTime() + accessTokenExpiration);
 
@@ -64,27 +55,13 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Refresh Token 생성
-     * @param id   사용자 식별자
+     * Refresh Token을 생성한다.
+     *
+     * @param id 사용자 식별자
      * @param role 사용자 권한
-     * @return 생성된 Refresh Token(JWT 문자열)
+     * @return JWT 형식의 Refresh Token
      */
     public String createRefreshToken(Long id, UserRole role) {
-        /**
-         * 사용자의 식별자(userId)와 권한(role)을 기반으로 Refresh Token을 생성한다.
-         * Refresh Token은 Access Token보다 훨씬 긴 만료 시간을 가지며,
-         * 만료된 Access Token을 재발급할 때 검증용으로 사용된다.
-         *
-         * 포함되는 정보:
-         * - subject: userId
-         * - role: 사용자 권한
-         * - iat: 발급 시간(issuedAt)
-         * - exp: 만료 시간(expiration)
-         *
-         * Access Token과 동일한 구조의 JWT이지만,
-         * 인증 요청에 직접 사용되지 않고 오로지 재발급 용도로만 사용된다.
-         */
-
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshTokenExpiration);
 
@@ -98,16 +75,13 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Refresh Token의 만료 시간을 추출하여 LocalDateTime으로 변환한다.
+     * JWT에서 만료 시간을 추출하여 LocalDateTime으로 변환한다.
      *
-     * Refresh Token 내부의 exp(만료 시각)는 Date 타입으로 저장되므로,
-     * DB에 저장하기 위해 LocalDateTime 타입으로 변환해 반환한다.
-     *
-     * @param refreshToken 만료 시간을 확인할 Refresh Token(JWT)
-     * @return LocalDateTime 형태의 만료 시각
+     * @param refreshToken 만료 시간을 확인할 Refresh Token
+     * @return 만료 시간 (LocalDateTime)
      */
     public LocalDateTime extractExpiry(String refreshToken) {
-        Claims claims = parseClaims(refreshToken);
+        Claims claims = validateAndGetClaims(refreshToken);
 
         return claims.getExpiration()
                 .toInstant()
@@ -116,20 +90,32 @@ public class JwtTokenProvider {
     }
 
     /**
-     * JWT를 파싱하여 Claims(페이로드 데이터)를 추출한다.
+     * JWT를 검증하고 Claims를 추출한다.
+     * 서명, 구조, 만료 시간 등을 자동으로 검증한다.
      *
-     * - SecretKey를 사용하여 JWT의 Signature를 검증한다.
-     * - 서명이 유효하고 토큰 구조가 올바른 경우 Claims(Payload)를 반환한다.
-     * - 위변조된 토큰이거나 형식이 잘못된 경우 예외가 발생한다.
-     *
-     * @param token 파싱하려는 JWT 문자열
-     * @return Claims 객체(Payload 정보)
+     * @param token JWT 토큰
+     * @return 검증된 Claims 객체
+     * @throws JwtException 토큰이 유효하지 않은 경우
      */
-    public Claims parseClaims(String token) {
+    public Claims validateAndGetClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    /**
+     * Refresh Token의 유효성을 검증한다.
+     *
+     * @param token 검증할 Refresh Token
+     * @throws BusinessException 토큰이 null, 공백이거나 유효하지 않은 경우
+     */
+    public void validateRefreshToken(String token) {
+        if (token == null || token.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+        validateAndGetClaims(token); // 예외 자동 전달
+    }
+
 }

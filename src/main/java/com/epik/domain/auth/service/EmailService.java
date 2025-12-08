@@ -19,6 +19,13 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    /**
+     * 비밀번호 재설정 이메일을 발송한다.
+     *
+     * @param email 수신자 이메일
+     * @param token 비밀번호 재설정 토큰
+     * @throws RuntimeException 이메일 발송 실패 시
+     */
     public void sendPasswordResetEmail(String email, String token) {
 
         log.info("[Email][PasswordReset] 이메일 발송 요청 - to={}, token={}", email, token);
@@ -48,10 +55,12 @@ public class EmailService {
     }
 
     /**
-     * HTML 이메일 발송 (공통 메서드)
-     * @param to
-     * @param subject
-     * @param htmlContent
+     * HTML 형식의 이메일을 발송한다.
+     *
+     * @param to 수신자 이메일
+     * @param subject 이메일 제목
+     * @param htmlContent HTML 본문 내용
+     * @throws MessagingException 이메일 생성 또는 발송 실패 시
      */
     private void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
         log.debug("[Email] MimeMessage 생성 시작");
@@ -72,11 +81,11 @@ public class EmailService {
         log.debug("[Email] mailSender.send() 호출 완료");
     }
 
-
     /**
-     * 비밀번호 재설정 HTML 템플릿
-     * @param resetLink
-     * @return
+     * 비밀번호 재설정 이메일 HTML 템플릿을 생성한다.
+     *
+     * @param resetLink 비밀번호 재설정 링크
+     * @return HTML 형식의 이메일 본문
      */
     private String createPasswordResetHtml(String resetLink) {
         return """
