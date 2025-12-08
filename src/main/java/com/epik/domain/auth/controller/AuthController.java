@@ -2,11 +2,13 @@ package com.epik.domain.auth.controller;
 
 import com.epik.domain.auth.dto.request.LoginRequest;
 import com.epik.domain.auth.dto.request.SignupRequest;
+import com.epik.domain.auth.dto.request.TokenReissueRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
 import com.epik.domain.auth.dto.response.JoinMethodResponse;
 import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
 import com.epik.domain.auth.dto.response.TokenResponse;
 import com.epik.domain.auth.service.AuthService;
+import com.epik.domain.auth.service.TokenService;
 import com.epik.global.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -18,13 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Validated // 클래스 레벨, @RequestParam, @PathVariable에 필요
+@Validated
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenService tokenService;
 
     @GetMapping("/email/available")
     public ResponseEntity<ApiResponse<EmailAvailabilityResponse>> checkEmailAvailability(
@@ -65,6 +68,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody @Valid LoginRequest request) {
         TokenResponse response = authService.login(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(@RequestBody TokenReissueRequest request) {
+        TokenResponse response = tokenService.reissue(request.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

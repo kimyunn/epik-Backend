@@ -24,6 +24,12 @@ public class PasswordService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * 비밀번호 재설정 이메일을 발송한다.
+     * 미등록 이메일인 경우 User Enumeration 공격 방지를 위해 조용히 무시한다.
+     *
+     * @param email 비밀번호를 재설정할 이메일
+     */
     public void sendPasswordResetEmail(String email) {
 
         log.info("[PasswordReset] 요청 수신 - email={}", email);
@@ -74,9 +80,11 @@ public class PasswordService {
     }
 
     /**
-     * 비밀번호 재설정 (로그인 전)
-     * @param token
-     * @param newPassword
+     * 토큰을 검증하고 비밀번호를 재설정한다.
+     *
+     * @param token 비밀번호 재설정 토큰
+     * @param newPassword 새 비밀번호
+     * @throws BusinessException 토큰이 유효하지 않거나 만료된 경우
      */
     @Transactional
     public void resetPassword(String token, String newPassword) {
