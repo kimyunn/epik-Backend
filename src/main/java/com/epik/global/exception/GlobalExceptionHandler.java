@@ -2,6 +2,7 @@ package com.epik.global.exception;
 
 import com.epik.global.common.dto.ApiResponse;
 import com.epik.global.common.dto.ErrorResponse;
+import com.epik.global.exception.custom.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

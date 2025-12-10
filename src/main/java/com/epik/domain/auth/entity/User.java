@@ -70,6 +70,15 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
+
+    public static User createSocialUser(String email, String nickname) {
+        return User.builder()
+                .joinType(UserJoinType.SOCIAL)
+                .email(email)
+                .nickname(nickname)
+                .build();
+    }
+
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }

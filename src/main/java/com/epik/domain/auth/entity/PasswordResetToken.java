@@ -1,6 +1,6 @@
 package com.epik.domain.auth.entity;
 
-import com.epik.global.exception.BusinessException;
+import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
