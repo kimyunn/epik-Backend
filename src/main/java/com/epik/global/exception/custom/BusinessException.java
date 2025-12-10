@@ -1,5 +1,6 @@
-package com.epik.global.exception;
+package com.epik.global.exception.custom;
 
+import com.epik.global.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter

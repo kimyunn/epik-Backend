@@ -7,7 +7,9 @@ import com.epik.domain.auth.repository.UserRepository;
 import com.epik.domain.auth.token.RefreshToken;
 import com.epik.domain.auth.token.RefreshTokenRepository;
 import com.epik.domain.auth.token.RefreshTokenService;
-import com.epik.global.exception.BusinessException;
+import com.epik.domain.oauth.dto.SocialProvider;
+import com.epik.domain.oauth.dto.SocialRegisterPayload;
+import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
@@ -94,4 +96,38 @@ public class TokenService {
         }
     }
 
+    /**
+     * Register Token을 생성한다.
+     * @param providerName 카카오/구글 등 소셜 플랫폼 이름
+     * @param socialId 소셜 로그인 계정의 고유 ID (sub)
+     * @param email 소셜 계정에서 가져온 이메일
+     * @return Register Token
+     */
+    public String createRegisterToken(SocialProvider providerName, String socialId, String email) {
+        return jwtTokenProvider.createRegisterToken(providerName, socialId, email);
+    }
+
+//    /**
+//     * Register Token 만료 여부 검증한다.
+//     * @param registerToken
+//     */
+//    public void validateRegisterTokenExpired(String registerToken) {
+//        if (jwtTokenProvider.isTokenInvalid(registerToken)) {
+//            throw new BusinessException(ErrorCode.INVALID_REGISTER_TOKEN);
+//        }
+//    }
+
+    /**
+     * 유효성 검증 + Claims 추출 + Payload 변환
+     * @param registerToken
+     * @return
+     */
+    public SocialRegisterPayload decodeRegisterToken(String registerToken) {
+        Claims claims = jwtTokenProvider.validateAndGetClaims(registerToken);
+        return SocialRegisterPayload.builder()
+                .provider(claims.get("provider", String.class))
+                .socialId(claims.get("socialId", String.class))
+                .email(claims.get("email", String.class))
+                .build();
+    }
 }

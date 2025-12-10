@@ -14,7 +14,7 @@ import com.epik.domain.auth.repository.ConsentItemRepository;
 import com.epik.domain.auth.repository.ForbiddenWordRepository;
 import com.epik.domain.auth.repository.UserConsentRepository;
 import com.epik.domain.auth.repository.UserRepository;
-import com.epik.global.exception.BusinessException;
+import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

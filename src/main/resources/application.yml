@@ -35,3 +35,15 @@ jwt:
 #    expiration: 30000  # 30초 (밀리초)
   refresh-token:
     expiration: 1209600000  # 14일 (밀리초)
+  register-token:
+    expiration: 900000 # 15분 (밀리초)
+
+# 상수 설정
+oauth:
+  kakao:
+    iss: ${KAKAO_ISS}
+    app-id: ${KAKAO_APP_ID}
+  google:
+    iss: ${GOOGLE_ISS}
+    client-ids: ${GOOGLE_APP_IDS}
+

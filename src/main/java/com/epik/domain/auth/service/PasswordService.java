@@ -4,7 +4,7 @@ import com.epik.domain.auth.entity.PasswordResetToken;
 import com.epik.domain.auth.entity.User;
 import com.epik.domain.auth.repository.PasswordResetTokenRepository;
 import com.epik.domain.auth.repository.UserRepository;
-import com.epik.global.exception.BusinessException;
+import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

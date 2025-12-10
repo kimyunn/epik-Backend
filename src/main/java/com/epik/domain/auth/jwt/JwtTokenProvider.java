@@ -1,7 +1,8 @@
 package com.epik.domain.auth.jwt;
 
 import com.epik.domain.auth.entity.enums.UserRole;
-import com.epik.global.exception.BusinessException;
+import com.epik.domain.oauth.dto.SocialProvider;
+import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -22,16 +23,19 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
+    private final long registerTokenExpiration;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-                            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
-        // 설정파일에 있는 base64로 인코딩된 문자열을 가져와서 -> 디코딩
-        byte[] decodedKey = Decoders.BASE64.decode(secretKey);
-        // -> key 객체 -> 그래야 jwt 서명에 사용 가능
-        this.secretKey = Keys.hmacShaKeyFor(decodedKey);
+                            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration,
+                            @Value("${jwt.register-token.expiration}") long registerTokenExpiration) {
+
+        // Base64 디코딩 후 HMAC SecretKey 생성
+        byte[] byteSecretKey = Decoders.BASE64.decode(secretKey);
+        this.secretKey = Keys.hmacShaKeyFor(byteSecretKey);
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.registerTokenExpiration = registerTokenExpiration;
     }
 
     /**
@@ -106,16 +110,39 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Refresh Token의 유효성을 검증한다.
+     * Token의 유효성을 검증한다.
      *
-     * @param token 검증할 Refresh Token
+     * @param token 검증할 Token
      * @throws BusinessException 토큰이 null, 공백이거나 유효하지 않은 경우
      */
-    public void validateRefreshToken(String token) {
-        if (token == null || token.isBlank()) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-        validateAndGetClaims(token); // 예외 자동 전달
+//    public void validateToken(String token) {
+//        if (token == null || token.isBlank()) {
+//            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+//        }
+//        validateAndGetClaims(token); // 예외 자동 전달
+//    }
+
+    /**
+     * Register Token을 생성한다.
+     * @param providerName 카카오/구글 등 소셜 플랫폼 이름
+     * @param socialId 소셜 로그인 계정의 고유 ID (sub)
+     * @param email 소셜 계정에서 가져온 이메일
+     * @return Register Token
+     */
+    public String createRegisterToken(SocialProvider providerName, String socialId, String email) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + registerTokenExpiration);
+
+        return Jwts.builder()
+                .subject("social_signup")
+                .claim("provider", providerName)
+                .claim("socialId", socialId)
+                .claim("email", email)
+                .expiration(expiry)
+                .signWith(secretKey)
+                .compact();
     }
+
+
 
 }
