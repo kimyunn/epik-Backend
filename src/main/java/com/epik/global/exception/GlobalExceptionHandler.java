@@ -9,6 +9,8 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,6 +20,25 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // 401 예외
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthenticationException(AuthenticationException e) {
+        ApiResponse<ErrorResponse> response = ApiResponse.error(ErrorCode.INVALID_TOKEN);
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(response);
+    }
+
+    // 403 예외
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException e) {
+        ApiResponse<ErrorResponse> response = ApiResponse.error(ErrorCode.ACCESS_DENIED);
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(response);
+    }
+
 
     // @Valid 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -2,7 +2,7 @@ package com.epik.domain.auth.service;
 
 import com.epik.domain.auth.dto.response.TokenResponse;
 import com.epik.domain.auth.entity.User;
-import com.epik.domain.auth.jwt.JwtTokenProvider;
+import com.epik.global.security.jwt.JwtProvider;
 import com.epik.domain.auth.repository.UserRepository;
 import com.epik.domain.auth.token.RefreshToken;
 import com.epik.domain.auth.token.RefreshTokenRepository;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TokenService {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
