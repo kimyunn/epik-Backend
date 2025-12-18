@@ -1,9 +1,9 @@
-package com.epik.domain.auth.jwt;
+package com.epik.global.security.jwt;
 
 import com.epik.domain.auth.entity.enums.UserRole;
 import com.epik.domain.oauth.dto.SocialProvider;
-import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
+import com.epik.global.exception.custom.BusinessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -18,17 +18,17 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
-public class JwtTokenProvider {
+public class JwtProvider {
 
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
     private final long registerTokenExpiration;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-                            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration,
-                            @Value("${jwt.register-token.expiration}") long registerTokenExpiration) {
+    public JwtProvider(@Value("${jwt.secret}") String secretKey,
+                       @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
+                       @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration,
+                       @Value("${jwt.register-token.expiration}") long registerTokenExpiration) {
 
         // Base64 디코딩 후 HMAC SecretKey 생성
         byte[] byteSecretKey = Decoders.BASE64.decode(secretKey);
@@ -51,7 +51,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(id.toString())
-                .claim("role", role)
+                .claim("role", role.name())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
@@ -110,17 +110,22 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Token의 유효성을 검증한다.
+     * Token의 유효성을 검증
      *
      * @param token 검증할 Token
      * @throws BusinessException 토큰이 null, 공백이거나 유효하지 않은 경우
      */
-//    public void validateToken(String token) {
-//        if (token == null || token.isBlank()) {
-//            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-//        }
-//        validateAndGetClaims(token); // 예외 자동 전달
-//    }
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);  // Claims는 버림
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
 
     /**
      * Register Token을 생성한다.
@@ -144,5 +149,13 @@ public class JwtTokenProvider {
     }
 
 
+    public Long getUserId(String token) {
+        Claims claims = validateAndGetClaims(token);
+        return Long.parseLong(claims.getSubject());
+    }
 
+    public String getRole(String token) {
+        Claims claims = validateAndGetClaims(token);
+        return claims.get("role", String.class);
+    }
 }
