@@ -50,7 +50,7 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private UserRole role = UserRole.USER;
+    private UserRole role = UserRole.ROLE_USER;
 
     @Column(name = "notice_last_checked_at")
     private LocalDateTime noticeLastCheckedAt;

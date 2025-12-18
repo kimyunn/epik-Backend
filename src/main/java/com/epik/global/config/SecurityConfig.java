@@ -1,15 +1,22 @@
 package com.epik.global.config;
 
+import com.epik.global.security.filter.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -18,21 +25,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                // CSRF 보호 비활성화 (API 서버용)
-                .csrf(AbstractHttpConfigurer::disable)
-
-                // 폼 로그인 비활성화
-                .formLogin(AbstractHttpConfigurer::disable)
-
-                // HTTP Basic 인증 비활성화
-                .httpBasic(AbstractHttpConfigurer::disable)
-
-                // 모든 요청 허용
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sess ->
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(form ->
+                        form.disable())
+                .httpBasic(basic ->
+                        basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // 🔓 모든 요청 허용
+                        // 회원 전용
+                        .requestMatchers("/api/v1/auth/logout").authenticated() // 로그아웃
+                        // 비회원
+                        .requestMatchers("/api/v1/auth/**").permitAll() // 인증 및 회원가입
+                        // 공개 조회
+                        .requestMatchers(HttpMethod.GET, "/api/v1/popups/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/notices/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
-                .build();
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+        return http.build();
     }
 }

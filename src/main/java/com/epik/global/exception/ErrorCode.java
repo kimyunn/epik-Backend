@@ -12,13 +12,14 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C-500", "서버 내부 오류가 발생했습니다."),
 
     // Auth - Login & Register (A-XXX)
-    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "A-001", "이미 존재하는 이메일입니다."),
-    NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "A-002", "이미 존재하는 닉네임입니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A-003", "회원을 찾을 수 없습니다."),
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A-004", "이메일 또는 비밀번호가 올바르지 않습니다."),
-    FORBIDDEN_WORD(HttpStatus.CONFLICT,"A-005", "닉네임에 제한된 단어가 포함되어 있습니다."),
-    REQUIRED_CONSENT_NOT_AGREED(HttpStatus.BAD_REQUEST, "A-006", "필수 약관에 동의해주세요."),
-    CONSENT_ITEM_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "A-007", "약관 항목을 찾을 수 없습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "A-001", "해당 리소스에 대한 접근 권한이 없습니다."),
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "A-002", "이미 존재하는 이메일입니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "A-003", "이미 존재하는 닉네임입니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A-004", "회원을 찾을 수 없습니다."),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A-005", "이메일 또는 비밀번호가 올바르지 않습니다."),
+    FORBIDDEN_WORD(HttpStatus.CONFLICT,"A-006", "닉네임에 제한된 단어가 포함되어 있습니다."),
+    REQUIRED_CONSENT_NOT_AGREED(HttpStatus.BAD_REQUEST, "A-007", "필수 약관에 동의해주세요."),
+    CONSENT_ITEM_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "A-008", "약관 항목을 찾을 수 없습니다."),
 
     // OIDC - ID Token (O-XXX)
     MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "O-001", "ID 토큰 형식이 올바르지 않습니다."),
