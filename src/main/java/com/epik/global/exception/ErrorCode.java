@@ -20,6 +20,7 @@ public enum ErrorCode {
     FORBIDDEN_WORD(HttpStatus.CONFLICT,"A-006", "닉네임에 제한된 단어가 포함되어 있습니다."),
     REQUIRED_CONSENT_NOT_AGREED(HttpStatus.BAD_REQUEST, "A-007", "필수 약관에 동의해주세요."),
     CONSENT_ITEM_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "A-008", "약관 항목을 찾을 수 없습니다."),
+    MEMBER_NOT_LOGGED_IN(HttpStatus.UNAUTHORIZED, "A-009","로그인이 필요합니다."),
 
     // OIDC - ID Token (O-XXX)
     MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "O-001", "ID 토큰 형식이 올바르지 않습니다."),
