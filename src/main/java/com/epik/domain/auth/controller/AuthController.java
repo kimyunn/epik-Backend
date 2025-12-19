@@ -9,17 +9,20 @@ import com.epik.domain.auth.dto.response.NicknameAvailabilityResponse;
 import com.epik.domain.auth.dto.response.TokenResponse;
 import com.epik.domain.auth.service.AuthService;
 import com.epik.domain.auth.service.TokenService;
+import com.epik.global.auth.annotation.AuthUser;
 import com.epik.global.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/api/v1/auth")
