@@ -1,7 +1,6 @@
 package com.epik.domain.oauth.service;
 
-import com.epik.domain.oauth.dto.OIDCDecodePayload;
-import com.epik.domain.oauth.dto.SocialProvider;
+import com.epik.domain.oauth.dto.SocialUserInfo;
 import com.epik.domain.oauth.dto.external.OIDCPublicKey;
 import com.epik.domain.oauth.dto.external.OIDCPublicKeysResponse;
 import com.epik.global.exception.ErrorCode;
@@ -11,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -20,22 +18,22 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 
-/**
- * OIDC 토큰 검증을 위한 추상 서비스 클래스
- * 템플릿 메서드 패턴을 사용하여 공통 로직을 정의하고,
- * Provider별 차이점은 하위 클래스에서 구현
- */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractOidcService {
+public abstract class AbstractOidcService implements SocialAuthProvider {
 
     protected final ObjectMapper objectMapper;
     private static final int JWT_PARTS_COUNT = 3;
 
+    @Override
+    public SocialUserInfo getUserInfo(String token) {
+        return getOIDCDecodePayload(token);
+    }
+
     /**
      * OIDC ID Token을 검증하고 페이로드를 반환하는 템플릿 메서드
      */
-    public OIDCDecodePayload getOIDCDecodePayload(String token) {
+    public SocialUserInfo getOIDCDecodePayload(String token) {
         // 1. JWT 헤더에서 kid 추출
         String kid = extractKidFromToken(token);
 
@@ -198,16 +196,12 @@ public abstract class AbstractOidcService {
      * Claims를 OIDCDecodePayload로 변환
      * Provider별로 claim 이름이 다를 수 있으므로 하위 클래스에서 구현
      */
-    protected abstract OIDCDecodePayload buildPayload(Claims claims);
+    protected abstract SocialUserInfo buildPayload(Claims claims);
 
     /**
      * OIDC Provider의 issuer 반환
      */
     protected abstract String getIssuer();
 
-    /**
-     * Provider 이름 반환 (로깅용)
-     */
-    protected abstract SocialProvider getProviderName();
 
 }

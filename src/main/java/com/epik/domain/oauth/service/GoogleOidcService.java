@@ -1,8 +1,8 @@
 package com.epik.domain.oauth.service;
 
 import com.epik.domain.oauth.client.GoogleOauthClient;
-import com.epik.domain.oauth.dto.OIDCDecodePayload;
 import com.epik.domain.oauth.dto.SocialProvider;
+import com.epik.domain.oauth.dto.SocialUserInfo;
 import com.epik.domain.oauth.dto.external.OIDCPublicKeysResponse;
 import com.epik.global.exception.ErrorCode;
 import com.epik.global.exception.custom.OidcAuthenticationException;
@@ -100,10 +100,10 @@ public class GoogleOidcService extends AbstractOidcService {
     }
 
     @Override
-    protected OIDCDecodePayload buildPayload(Claims claims) {
+    protected SocialUserInfo buildPayload(Claims claims) {
         String audience = extractFirstAudience(claims);
 
-        return new OIDCDecodePayload(
+        return new SocialUserInfo(
                 claims.getIssuer(),
                 audience,
                 claims.getSubject(),
@@ -142,7 +142,7 @@ public class GoogleOidcService extends AbstractOidcService {
     }
 
     @Override
-    protected SocialProvider getProviderName() {
+    public SocialProvider getProviderName() {
         return GOOGLE;
     }
 }
