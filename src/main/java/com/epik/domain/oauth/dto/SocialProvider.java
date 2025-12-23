@@ -3,7 +3,7 @@ package com.epik.domain.oauth.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum SocialProvider {
-    KAKAO, GOOGLE;
+    KAKAO, GOOGLE, NAVER;
 
     @JsonCreator
     public static SocialProvider from(String value) {
