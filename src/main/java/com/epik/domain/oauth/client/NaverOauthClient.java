@@ -1,6 +1,6 @@
 package com.epik.domain.oauth.client;
 
-import com.epik.domain.oauth.dto.response.NaverUserInfoResponse;
+import com.epik.domain.oauth.dto.external.NaverUserInfoResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
         url = "https://openapi.naver.com"
 )
 public interface NaverOauthClient {
-
-    @GetMapping
+    @GetMapping("/v1/nid/me")
     NaverUserInfoResponse getUserInfo(@RequestHeader("Authorization") String authorization);
 
 }

@@ -1,4 +1,4 @@
-package com.epik.domain.oauth.dto.response;
+package com.epik.domain.oauth.dto.external;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +10,14 @@ public class NaverUserInfoResponse {
     private String message;
     private Response response;
 
+    public boolean isSuccess() {
+        return "00".equals(resultcode);
+    }
+
     @Getter
     @NoArgsConstructor
     public static class Response {
-        private String id;     // 유니크한 일련번호
+        private String id;
         private String email;
-        private String name;
     }
 }

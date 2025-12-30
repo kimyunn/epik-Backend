@@ -7,8 +7,7 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class OIDCPublicKey {
-
+public class Jwk {
     private String kid;
     private String alg;
     private String use;

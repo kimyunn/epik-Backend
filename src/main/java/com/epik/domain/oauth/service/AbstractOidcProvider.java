@@ -1,8 +1,8 @@
 package com.epik.domain.oauth.service;
 
 import com.epik.domain.oauth.dto.SocialUserInfo;
-import com.epik.domain.oauth.dto.external.OIDCPublicKey;
-import com.epik.domain.oauth.dto.external.OIDCPublicKeysResponse;
+import com.epik.domain.oauth.dto.external.Jwk;
+import com.epik.domain.oauth.dto.external.JwksResponse;
 import com.epik.global.exception.ErrorCode;
 import com.epik.global.exception.custom.OidcAuthenticationException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,7 +20,7 @@ import java.util.Base64;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractOidcService implements SocialAuthProvider {
+public abstract class AbstractOidcProvider implements SocialAuthProvider {
 
     protected final ObjectMapper objectMapper;
     private static final int JWT_PARTS_COUNT = 3;
@@ -38,10 +38,10 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
         String kid = extractKidFromToken(token);
 
         // 2. OIDC Provider로부터 공개키 목록 조회
-        OIDCPublicKeysResponse publicKeysResponse = fetchPublicKeys();
+        JwksResponse publicKeysResponse = fetchPublicKeys();
 
         // 3. kid와 매칭되는 공개키 찾기
-        OIDCPublicKey oidcPublicKey = findPublicKeyByKid(kid, publicKeysResponse);
+        Jwk oidcPublicKey = findPublicKeyByKid(kid, publicKeysResponse);
 
         // 4. RSA 공개키 생성
         PublicKey publicKey = generateRSAPublicKey(oidcPublicKey.getN(), oidcPublicKey.getE());
@@ -49,49 +49,47 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
         // 5. JWT 토큰 검증 및 Claims 추출
         Claims claims = verifyTokenAndExtractClaims(token, publicKey);
 
-        // 6. Claims를 OIDCDecodePayload로 변환
-        return buildPayload(claims);
+        // 6. Claims를 SocialUserInfo로 변환
+        return toSocialUserInfo(claims);
     }
 
     /**
      * JWT 헤더에서 kid(Key ID) 추출
      */
     protected String extractKidFromToken(String token) {
-        log.debug("🔍 JWT 헤더에서 KID 추출 시작");
+        log.debug("JWT 헤더에서 KID 추출 시작");
 
         if (token == null || token.trim().isEmpty()) {
-            log.error("❌ 토큰이 null이거나 비어있음");
+            log.error("토큰이 null이거나 비어있음");
             throw new OidcAuthenticationException(ErrorCode.MALFORMED_ID_TOKEN);
         }
 
         try {
             String[] parts = token.split("\\.");
-            log.debug("📝 토큰 분리 결과: {} 개 파트", parts.length);
 
             if (parts.length != JWT_PARTS_COUNT) {
-                log.error("❌ 잘못된 JWT 형식 - 파트 수: {} (예상: {})", parts.length, JWT_PARTS_COUNT);
+                log.error("잘못된 JWT 형식 - 파트 수: {} (예상: {})", parts.length, JWT_PARTS_COUNT);
                 throw new OidcAuthenticationException(ErrorCode.MALFORMED_ID_TOKEN);
             }
 
             String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]));
-            log.debug("📝 디코딩된 헤더 JSON: {}", headerJson);
 
             JsonNode headerNode = objectMapper.readTree(headerJson);
 
             if (!headerNode.has("kid")) {
-                log.error("❌ 헤더에 kid 필드가 없습니다");
+                log.error("헤더에 kid 필드가 없습니다");
                 throw new OidcAuthenticationException(ErrorCode.OIDC_SERVER_ERROR);
             }
 
             String kid = headerNode.get("kid").asText();
-            log.debug("✅ KID 추출 성공: '{}'", kid);
+            log.debug("KID 추출 성공: '{}'", kid);
 
             return kid;
 
         } catch (OidcAuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            log.error("❌ JWT 헤더에서 KID 추출 실패", e);
+            log.error("JWT 헤더에서 KID 추출 실패", e);
             throw new OidcAuthenticationException(ErrorCode.OIDC_SERVER_ERROR);
         }
     }
@@ -99,14 +97,14 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
     /**
      * kid와 매칭되는 공개키 찾기
      */
-    protected OIDCPublicKey findPublicKeyByKid(String kid, OIDCPublicKeysResponse publicKeysResponse) {
-        log.debug("🔍 KID로 공개키 찾기 시작: '{}'", kid);
+    protected Jwk findPublicKeyByKid(String kid, JwksResponse publicKeysResponse) {
+        log.debug("KID로 공개키 찾기 시작: '{}'", kid);
 
         return publicKeysResponse.getKeys().stream()
                 .filter(key -> key.getKid().equals(kid))
                 .findFirst()
                 .orElseThrow(() -> {
-                    log.error("❌ 일치하는 KID를 찾을 수 없음: '{}'", kid);
+                    log.error("일치하는 KID를 찾을 수 없음: '{}'", kid);
                     return new OidcAuthenticationException(ErrorCode.OIDC_SERVER_ERROR);
                 });
     }
@@ -154,15 +152,15 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
             return claims;
 
         } catch (ExpiredJwtException e) {
-            log.warn("❌ ID Token expired: exp={}", e.getClaims().getExpiration());
+            log.warn("ID Token expired: exp={}", e.getClaims().getExpiration());
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         } catch (IncorrectClaimException e) {
-            log.warn("❌ Invalid claim: {}", e.getMessage());
+            log.warn("Invalid claim: {}", e.getMessage());
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         } catch (OidcAuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            log.error("❌ ID Token parsing/validation failed", e);
+            log.error("ID Token parsing/validation failed", e);
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         }
     }
@@ -184,7 +182,7 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
      * OIDC Provider로부터 공개키 목록 조회
      * Provider별로 엔드포인트가 다르므로 하위 클래스에서 구현
      */
-    protected abstract OIDCPublicKeysResponse fetchPublicKeys();
+    protected abstract JwksResponse fetchPublicKeys();
 
     /**
      * Claims 추가 검증 (예: audience 검증)
@@ -193,10 +191,10 @@ public abstract class AbstractOidcService implements SocialAuthProvider {
     protected abstract void validateAdditionalClaims(Claims claims);
 
     /**
-     * Claims를 OIDCDecodePayload로 변환
-     * Provider별로 claim 이름이 다를 수 있으므로 하위 클래스에서 구현
+     * ✨ Claims를 SocialUserInfo로 변환
+     * kakao, google은 email이 존재, naver는 존재하지 않기때문에 하위 클래스에서 구현
      */
-    protected abstract SocialUserInfo buildPayload(Claims claims);
+    protected abstract SocialUserInfo toSocialUserInfo(Claims claims);
 
     /**
      * OIDC Provider의 issuer 반환

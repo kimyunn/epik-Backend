@@ -1,9 +1,9 @@
 package com.epik.domain.oauth.service;
 
-import com.epik.domain.oauth.client.GoogleOauthClient;
-import com.epik.domain.oauth.dto.SocialProvider;
+import com.epik.domain.oauth.client.GoogleJwksClient;
+import com.epik.domain.oauth.dto.enums.SocialProvider;
 import com.epik.domain.oauth.dto.SocialUserInfo;
-import com.epik.domain.oauth.dto.external.OIDCPublicKeysResponse;
+import com.epik.domain.oauth.dto.external.JwksResponse;
 import com.epik.global.exception.ErrorCode;
 import com.epik.global.exception.custom.OidcAuthenticationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,22 +16,18 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 
-import static com.epik.domain.oauth.dto.SocialProvider.GOOGLE;
+import static com.epik.domain.oauth.dto.enums.SocialProvider.GOOGLE;
 
-/**
- * 구글 OIDC 인증 서비스
- * AbstractOidcService를 상속받아 구글 특화 로직만 구현
- */
 @Slf4j
 @Service
-public class GoogleOidcService extends AbstractOidcService {
+public class GoogleOidcProvider extends AbstractOidcProvider {
 
-    private final GoogleOauthClient googleOauthClient;
+    private final GoogleJwksClient googleOauthClient;
     private final String iss;
     private final List<String> googleClientIds;
 
-    public GoogleOidcService(
-            GoogleOauthClient googleOauthClient,
+    public GoogleOidcProvider(
+            GoogleJwksClient googleOauthClient,
             ObjectMapper objectMapper,
             @Value("${oauth.google.iss}") String iss,
             @Value("${oauth.google.client-ids}") List<String> googleClientIds) {
@@ -40,19 +36,19 @@ public class GoogleOidcService extends AbstractOidcService {
         this.iss = iss;
         this.googleClientIds = googleClientIds;
 
-        log.info("🚀 GoogleOidcService 초기화 완료 - ISS: {}, 클라이언트 IDs: {}", iss, googleClientIds);
+        log.info("GoogleOidcService 초기화 완료 - ISS: {}, 클라이언트 IDs: {}", iss, googleClientIds);
     }
 
     @Override
-    protected OIDCPublicKeysResponse fetchPublicKeys() {
-        log.debug("🌐 Google OIDC 공개키 목록 조회 시작");
+    protected JwksResponse fetchPublicKeys() {
+        log.debug("Google OIDC 공개키 목록 조회 시작");
 
         try {
-            OIDCPublicKeysResponse response = googleOauthClient.getGoogleOIDCOpenKeys();
-            log.debug("✅ 공개키 목록 조회 성공: {} 개의 키", response.getKeys().size());
+            JwksResponse response = googleOauthClient.getJwks();
+            log.debug("공개키 목록 조회 성공: {} 개의 키", response.getKeys().size());
             return response;
         } catch (FeignException e) {
-            log.error("❌ Google 공개키 조회 실패", e);
+            log.error("Google 공개키 조회 실패", e);
             throw new OidcAuthenticationException(ErrorCode.OIDC_SERVER_ERROR);
         }
     }
@@ -62,11 +58,11 @@ public class GoogleOidcService extends AbstractOidcService {
         // 구글은 audience를 배열 또는 단일 문자열로 제공할 수 있음
         Object audObj = claims.get("aud");
 
-        log.debug("📝 AUD 검증 시작 - 타입: {}, 값: {}",
+        log.debug("AUD 검증 시작 - 타입: {}, 값: {}",
                 audObj != null ? audObj.getClass().getName() : "null", audObj);
 
         if (audObj == null) {
-            log.error("❌ Audience 클레임이 없음");
+            log.error("Audience 클레임이 없음");
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         }
 
@@ -75,7 +71,7 @@ public class GoogleOidcService extends AbstractOidcService {
         // AUD가 String인 경우
         if (audObj instanceof String tokenAud) {
             isValid = googleClientIds.contains(tokenAud);
-            log.debug("📝 String AUD 검증: '{}' - 결과: {}", tokenAud, isValid);
+            log.debug("String AUD 검증: '{}' - 결과: {}", tokenAud, isValid);
         }
         // AUD가 Collection인 경우 (구글 스타일)
         else if (audObj instanceof Collection) {
@@ -83,32 +79,27 @@ public class GoogleOidcService extends AbstractOidcService {
             Collection<String> audCollection = (Collection<String>) audObj;
             isValid = googleClientIds.stream()
                     .anyMatch(audCollection::contains);
-            log.debug("📝 Collection AUD 검증: {} - 결과: {}", audCollection, isValid);
+            log.debug("Collection AUD 검증: {} - 결과: {}", audCollection, isValid);
         }
         // 예상하지 못한 타입
         else {
-            log.error("❌ 예상하지 못한 AUD 타입: {}", audObj.getClass().getName());
+            log.error("예상하지 못한 AUD 타입: {}", audObj.getClass().getName());
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         }
 
         if (!isValid) {
-            log.error("❌ Audience 검증 실패 - 허용된 클라이언트 IDs: {}", googleClientIds);
+            log.error("Audience 검증 실패 - 허용된 클라이언트 IDs: {}", googleClientIds);
             throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
         }
 
-        log.debug("✅ Audience 검증 성공");
+        log.debug("Audience 검증 성공");
     }
 
     @Override
-    protected SocialUserInfo buildPayload(Claims claims) {
-        String audience = extractFirstAudience(claims);
-
+    protected SocialUserInfo toSocialUserInfo(Claims claims) {
         return new SocialUserInfo(
-                claims.getIssuer(),
-                audience,
                 claims.getSubject(),
-                claims.get("email", String.class),
-                claims.get("name", String.class)  // 구글은 name 사용
+                claims.get("email", String.class)
         );
     }
 
@@ -132,7 +123,7 @@ public class GoogleOidcService extends AbstractOidcService {
             }
         }
 
-        log.error("❌ AUD 클레임에서 유효한 값을 추출할 수 없음: {}", audObj);
+        log.error("AUD 클레임에서 유효한 값을 추출할 수 없음: {}", audObj);
         throw new OidcAuthenticationException(ErrorCode.INVALID_OR_EXPIRED_TOKEN);
     }
 
