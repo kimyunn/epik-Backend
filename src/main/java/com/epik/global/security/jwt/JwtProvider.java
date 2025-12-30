@@ -1,8 +1,7 @@
 package com.epik.global.security.jwt;
 
 import com.epik.domain.auth.entity.enums.UserRole;
-import com.epik.domain.oauth.dto.SocialProvider;
-import com.epik.global.exception.ErrorCode;
+import com.epik.domain.oauth.dto.enums.SocialProvider;
 import com.epik.global.exception.custom.BusinessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

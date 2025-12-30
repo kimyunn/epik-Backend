@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)  // null 필드는 JSON에서 제외
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SocialCheckResponse {
     private String status;
 
@@ -16,8 +16,8 @@ public class SocialCheckResponse {
 
     // 신규 회원용
     private String registerToken;
+    private String email;
 
-    // 정적 팩토리 메서드
     public static SocialCheckResponse loginSuccess(String accessToken, String refreshToken) {
         return SocialCheckResponse.builder()
                 .status("LOGIN_SUCCESS")
@@ -26,10 +26,11 @@ public class SocialCheckResponse {
                 .build();
     }
 
-    public static SocialCheckResponse needSignup(String registerToken) {
+    public static SocialCheckResponse needSignup(String registerToken, String email) {
         return SocialCheckResponse.builder()
                 .status("NEED_SIGNUP")
                 .registerToken(registerToken)
+                .email(email)
                 .build();
     }
 }

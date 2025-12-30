@@ -21,11 +21,28 @@ public enum ErrorCode {
     REQUIRED_CONSENT_NOT_AGREED(HttpStatus.BAD_REQUEST, "A-007", "필수 약관에 동의해주세요."),
     CONSENT_ITEM_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "A-008", "약관 항목을 찾을 수 없습니다."),
     MEMBER_NOT_LOGGED_IN(HttpStatus.UNAUTHORIZED, "A-009","로그인이 필요합니다."),
+    NEED_REGISTRATION(HttpStatus.ACCEPTED, "A-010", "추가 정보가 필요합니다."),
+    EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "A-011", "이메일을 입력해주세요."),
 
     // OIDC - ID Token (O-XXX)
     MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "O-001", "ID 토큰 형식이 올바르지 않습니다."),
     INVALID_OR_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "O-002", "유효하지 않거나 만료된 토큰입니다"),
     OIDC_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "O-500", "ID 토큰 처리 중 오류가 발생했습니다."),
+
+    // OAuth2 특화 (OA-XXX)
+    OAUTH2_USER_INFO_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OA-001", "사용자 정보 조회에 실패했습니다."),
+
+    // Provider 관련 (PR-XXX)
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "PR-001", "지원하지 않는 소셜 로그인입니다."),
+    PROVIDER_REQUIRED(HttpStatus.BAD_REQUEST, "PR-002", "소셜 로그인 제공자를 선택해주세요."),
+
+
+    // 소셜 인증 관련 (SA-XXX)
+    SOCIAL_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "SA-001", "유효하지 않은 소셜 로그인 토큰입니다."),
+    SOCIAL_SIGNUP_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SA-500", "소셜 회원가입 처리 중 오류가 발생했습니다."),
+
+    // Provider API 오류 (PA-XXX)
+    PROVIDER_API_ERROR(HttpStatus.BAD_GATEWAY, "PA-001", "소셜 로그인 처리 중 오류가 발생했습니다."),
 
     // Token - Access/Refresh (T-XXX)
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "T-001", "유효하지 않은 토큰입니다."),

@@ -1,6 +1,7 @@
 package com.epik.domain.oauth.entity;
 
 import com.epik.domain.auth.entity.User;
+import com.epik.domain.oauth.dto.enums.SocialProvider;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +18,8 @@ import java.time.LocalDateTime;
         name = "social_logins",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "UQ_social_login_provider_id",
-                        columnNames = {"social_id", "provider_id"}
+                        name = "UQ_social_logins_social_id_provider",
+                        columnNames = {"social_id", "provider"}
                 )
         }
 )
@@ -39,9 +40,9 @@ public class SocialLogin {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "provider_id", nullable = false)
-    private SocialLoginProvider provider;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private SocialProvider provider;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
