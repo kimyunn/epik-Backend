@@ -136,4 +136,9 @@ public class TokenService {
                 .email(claims.get("email", String.class))
                 .build();
     }
+
+    public Long getUserIdFromToken(String token) {
+        return jwtProvider.getUserId(token);
+    }
+
 }

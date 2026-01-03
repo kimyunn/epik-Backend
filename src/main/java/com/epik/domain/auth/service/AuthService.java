@@ -1,5 +1,6 @@
 package com.epik.domain.auth.service;
 
+import com.epik.domain.auth.dto.request.LogoutRequest;
 import com.epik.domain.auth.dto.request.SignupRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
 import com.epik.domain.auth.dto.response.JoinMethodResponse;
@@ -14,9 +15,12 @@ import com.epik.domain.auth.repository.ConsentItemRepository;
 import com.epik.domain.auth.repository.ForbiddenWordRepository;
 import com.epik.domain.auth.repository.UserConsentRepository;
 import com.epik.domain.auth.repository.UserRepository;
+import com.epik.domain.auth.token.RefreshToken;
+import com.epik.domain.auth.token.RefreshTokenRepository;
 import com.epik.global.exception.custom.BusinessException;
 import com.epik.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +38,7 @@ public class AuthService {
     private final ConsentItemRepository consentItemRepository;
     private final UserConsentRepository userConsentRepository;
     private final TokenService tokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private List<String> cachedForbiddenWords;
 
@@ -255,5 +260,10 @@ public class AuthService {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
+    }
+
+    @Transactional
+    public void logout(Long userId, LogoutRequest request) {
+        refreshTokenRepository.deleteByUserIdAndToken(userId, request.getRefreshToken());
     }
 }
