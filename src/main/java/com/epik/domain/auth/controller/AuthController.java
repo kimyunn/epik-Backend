@@ -1,6 +1,7 @@
 package com.epik.domain.auth.controller;
 
 import com.epik.domain.auth.dto.request.LoginRequest;
+import com.epik.domain.auth.dto.request.LogoutRequest;
 import com.epik.domain.auth.dto.request.SignupRequest;
 import com.epik.domain.auth.dto.request.TokenReissueRequest;
 import com.epik.domain.auth.dto.response.EmailAvailabilityResponse;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,5 +81,13 @@ public class AuthController {
     public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(@RequestBody TokenReissueRequest request) {
         TokenResponse response = tokenService.reissue(request.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthUser Long userId, @RequestBody @Valid LogoutRequest request) {
+        authService.logout(userId, request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success());
     }
 }
